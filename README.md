@@ -1,18 +1,20 @@
-# shell
-Meus arquivos em shell para uso em pentest:
-Requer que tenha em seu sistema Linux com as ferramentas Zenety e Yad instaladaas
-* Arquivo feito para rodar no terminal ->
-* Rode os comandos:
-  a) bash
-  sudo chmod+x severinogo.sh
-  bash severinogo.sh
+Update severinogo.sh
+Adicionei novos recursos!
+Aos poucos eu deva está adicionando novas itens.
+Lembrando que para rodar temos que ter instalado:
+-> zenity
+-> yad
+-> curl
+-> gobuster
+-> subfinder
+-> httpx-toolkit
+-> wafw00f
 
-  Esse script requer também que seu sistema tenha instalado as ferranetas
-  gobuster
-  httpx-toolkit
-  curl.
+para rodar no terminal:
+bash
+chmod +x severinogo.sh
+bash severinogo.sh
 
-  Ele automatisa comandos e uso do gobuster, httpx-toolkit e curl voltados para scanear subdomínios ...
-
-  Agradecimentos a:
-  Ricardo Longatto - Professor obrigado pela aula demonstrativa de como vencer um waf. Graças ao seu curso e a aula que aos poucos vou adicicionando novos recursos no script.
+-> Agradecimentos ao professor Ricardo Longatto . 
+Grato pelo seu curso que aos poucos estou tentando estudar e aprender;
+grato pela seu vídeo vencendo o waf : https://youtu.be/RJeNNc3cOiU?si=mIvDySSZfAkV4vPmmain
