@@ -20,6 +20,10 @@ FALSE "Gobuster-dir normal" \
 FALSE "Gobuster-dir-arquivo" \
 FALSE "Gobuster-proxy" \
 FALSE "Gobuster-dir-contrabarra" \
+FALSE "Gobuster-dir-contrabarra-cut" \
+FALSE "Remover os dominios da lista de subdominios-cut" \
+FALSE "CURL-GREP" \
+FALSE "Wget-baixar-extenssão" \
 TRUE  "Sair" )
 
 case $go in
@@ -144,7 +148,7 @@ WORDLIST=$(zenity --file-selection --title "Seleção de arquivo" --filename="/u
 # Um valor baixo (ex: 10) é menos invasivo para a rede local
 THREADS=$(zenity --entry  --title "Threads" --text "Digite um valor para o THREADS:")
 # Arquivo para salvar a saída do Gobuster
-OUTPUT_FILE=$(zenity --entry  --title "NOME-LISTA.TXT" --text "digite o nome da lista de subdomínios.txt":)
+OUTPUT_FILE=$(zenity --entry  --title "NOME-LISTA.TXT" --text "digite o nome para criar lista de subdomínios.txt":)
 echo "Iniciando varredura de subdomínios em $DOMAIN na rede local..."
 echo "A wordlist utilizada é: $WORDLIST"
 # Executa o Gobuster com o modo DNS e parâmetros avançados
@@ -193,11 +197,13 @@ sleep 1
 HTTP_STATUS=$(curl -m 2 -s -o /dev/null -I -w "%{http_code}" --connect-timeout 2 -A "$USER_AGENT" "${i}.${dominio}")
 # Verifica se o código de status HTTP indica sucesso (códigos 2xx ou 3xx)
 if [[ "$HTTP_STATUS" =~ ^(2|3)[0-9]{2}$ ]] ; then
- echo "Serviço HTTP ativo em ${i}.${dominio} (Código: $HTTP_STATUS)" >> sub.txt
+ echo "Serviço HTTP ativo em ${i}.${dominio} (Código: $HTTP_STATUS)" >> sub-curl.txt
 fi
 done
 echo "Varredura concluída."
-echo "subdomínios enviados para o arquivo sub.txt"
+zenity --info --title="Resultado" --text="subdomínios enviados para o arquivo subc-curl.txt"
+cat sub-curl.txt |zenity --title "Conteúdo de: sub-curl.txt" --text-info --editable --width=800 --height=400  2>/dev/null
+clear  
 ;;
 "Encontrar subdomínios-subfinder")
 dominio=$(zenity --entry  --title "Dominio" --text "Digite o dominio:")
@@ -355,6 +361,101 @@ lista2=$(zenity --file-selection --title "SELECIONE SCANDIR" --filename=".")
 # Scaneando o dominio
 dominio=$(zenity --entry  --title "Dominio" --text "Digite o dominio:")
 gobuster dir -u "$dominio" -w "$lista2" --random-agent -f 
+;;
+"Gobuster-dir-contrabarra-cut")
+#RETIRANDO A PRIMEIRA PALAVRA DE UMA LISTA
+# Modificando lista1
+lista1=$(zenity --file-selection --title "LISTA FINAL.TXT" --filename=".")
+cat "$lista1" | cut -d . -f 1 > scandir
+# Selecionando lista2 scandir
+lista2=$(zenity --file-selection --title "SELECIONE SCANDIR" --filename=".")
+# Scaneando o dominio
+dominio=$(zenity --entry  --title "Dominio" --text "Digite o dominio:")
+gobuster dir -u "$dominio" -w "$lista2" --random-agent -f 
+;;
+"Remover os dominios da lista de subdominios-cut")
+WORDLIST=$(zenity --file-selection --title "LISTA FINAL.TXT" --filename=".")
+WORDLIST2=$(zenity --entry  --title "WORDLIST2" --text "Digite um nome para a wordlist2:")
+cat "$WORDLIST" | cut -d . -f 1 > "$WORDLIST2"
+;;
+"CURL-GREP")
+#USER ATENT:
+# Parâmetro ->  -A: Define o User-Agent
+#
+#USO DE PROXY
+#Principais formas de usar proxy com cURL
+#Opção de Linha de Comando (-x / --proxy):
+#curl -x  hxtp://seu.proxy.com:8080 hxtps://www.google.com
+#Use socks4://, socks5://, etc., para proxies SOCKS. 
+#curl -x socks5://proxy.example.com:1080 hxtps://www.example.com
+#Variáveis de Ambiente:
+#Linux/macOS:
+#export http_proxy="hxtp://seu.proxy.com:8080"
+#export https_proxy="hxtp://seu.proxy.com:8080"
+#curl hxtps://www.google.com # cURL usará o proxy automaticamente
+#Windows: Use set no CMD ou $env:http_proxy no PowerShell.
+#Autenticação:
+#Use --proxy-user para nome de usuário e senha:
+#curl --proxy-user usuario:senha -x hxtp://seu.proxy.com:8080 hx tps://www.google.com
+#Ignorar Proxy:
+#Use --noproxy para listar hosts que não devem usar proxy (ex: localhost,127.0.0.1,.meudominio.local).
+#Arquivo de Configuração:
+#Crie um arquivo .curlrc (ou _curlrc no Windows) com configurações permanentes, como proxy = hxtp://seu.proxy.com:8080.   
+url=$(zenity --entry  --title "url" --text "Digite a URL do Site:")
+USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/108.0.0.0 Safari/537.30"
+busca=$(zenity --entry  --title "PARAMETRO:href ; .php ; src etc" --text "Digite o parâmetro a buscar:")
+ curl -A \""$USER_AGENT"\" "$url" | grep "$busca" 
+cat resposta.txt
+;;
+"Wget-baixar-extenssão")
+#1. Usando Variáveis de Ambiente (Método Preferencial)
+#O wget respeita automaticamente as variáveis de ambiente http_proxy, https_proxy e ftp_proxy. Esta é a forma mais flexível, pois funciona para qualquer comando wget subsequente na mesma sessão de terminal.
+#Você define a variável antes de executar o comando:
+#bash
+# Para tráfego HTTP
+#export http_proxy=hxtp://proxy.example.com:8080
+# Para tráfego HTTPS (se necessário um proxy diferente)
+#export https_proxy=hxtp://proxy.example.com:8080
+# Exemplo de uso:
+#wget site.com
+#Com autenticação:
+#bash
+#export http_proxy=hxtp://usuario:senha*arroba*proxy.example.com:8080
+#wget site.com
+#2. Usando Parâmetros de Linha de Comando
+#Se você quiser configurar o proxy apenas para um único comando wget sem afetar sua sessão de terminal, use os parâmetros --proxy e --proxy-user/--proxy-password.
+#Sintaxe básica com --proxy=on:
+#Você precisa explicitamente ativar o uso do proxy com --proxy=on se ele já não estiver configurado via variáveis de ambiente.
+#bash
+#wget --proxy=on -e http_proxy=hxtp://proxy.example.com:8080 site.com
+#Sintaxe alternativa para proxy/usuário/senha:
+#bash
+#wget --proxy-user=meuusuario --proxy-password=minhasenha site.com
+#Use o código com cuidado.
+#3. Desativando o Proxy (Exceção)
+#Caso você tenha as variáveis de ambiente configuradas globalmente, mas precise que um comando wget específico não use o proxy, você pode usar o parâmetro --no-proxy.
+#bash
+#wget --no-proxy site.com
+#+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+#Arquivo para configurar um proxy:
+#Edite o arquivo ~.wgetrc ou /etc/wgetrc para todo o sistema
+#Adicione as linhas (sem export):
+#use_proxy = on
+#http_proxy = http//seu_proxy_.com:porta
+#https_proxy = http//seu_proxy_.com:porta
+# PARAMETROS WGET:
+# -r -> Recursivo
+# -np -> Não permite sair do enderesso passado
+# -nd -> Não salvar nem criar diretórios
+# -A ->  Extenssão do arquivo
+AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/108.0.0.0 Safari/537.30"
+diretorio=$(zenity --entry  --title "diretório" --text "Digite o nome do diretório que quer criar:")
+mkdir "$diretorio" 
+ext=$(zenity --entry  --title "Extenssão" --text "Digite a .extenssão que quer baixar:")
+url=$(zenity --entry  --title "url" --text "Digite a URL do Site:")
+echo "Entre no diretório $diretorio e cole o comando: wget --user-agent=\""$AGENT"\" -r -np -nd  -A \""$ext"\"  "$url" " > comando.txt
+cat comando.txt |zenity --title "Cole dentro de $diretorio" --text-info --editable --width=800 --height=400  2>/dev/null
+clear  
 ;;
 "Sair")
 clear
