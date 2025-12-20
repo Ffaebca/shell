@@ -24,6 +24,11 @@ FALSE "Gobuster-dir-contrabarra-cut" \
 FALSE "Remover os dominios da lista de subdominios-cut" \
 FALSE "CURL-GREP" \
 FALSE "Wget-baixar-extenssão" \
+FALSE "Consulta com o egrep" \
+FALSE "Ler arquivo php de diretório" \
+FALSE "Ler arquivo php com token" \
+FALSE "wfuzz saber filtro" \
+FALSE "Wfuzz selecionar filtro" \
 TRUE  "Sair" )
 
 case $go in
@@ -173,6 +178,8 @@ fi
 for i in $(cat dns-teste) ; do host $i.corpnetwork.com.br; done | grep -v "not found" 
 ;;
 "Encontrar subdommínios-curl")
+#instalar o curl -> apt install curl
+#instalar o libcurl -> apt install libcurl4-openssl-dev ou apt install libcurl4-gnutls-dev
 # Define subdominios a ser escaneados
 dominio=$(zenity --entry  --title "Dominio" --text "Digite o dominio:")
 WORDLIST=$(zenity --file-selection --title "Seleção de arquivo" --filename="/usr/share/seclists/Discovery/DNS/")
@@ -235,7 +242,7 @@ curl  "${site}" -A "$USER_AGENT"
 ;;
 "Wafw00f - verificar waf")
 site=$(zenity --entry  --title "Dominio" --text "Digite o endereço http ou https do site:")
-verbose=$(zenity --entry --title "Verbose" --text "escolha a quantidade de verbose" " " v vv vvv)
+verbose=$(zenity --entry --title "Verbose" --text "escolha a quantidade de verbose:" " " v vv vvv)
 wafw00f -a -r "$site"  -"$verbose"
 ;;
 "Gobuster-dir normal")
@@ -280,7 +287,8 @@ fi
 # 2. A varredura deve ser realizada em ambiente controlado para não sobrecarregar o servidor.
 # 3. Este script usa um alvo local de exemplo; substitua-o pelo seu alvo autorizado.
 # Defina a URL completa do alvo local. 
-TARGET_URL=$(zenity --entry  --title "Dominio" --text "Digite o nome do domínio")
+url=$(zenity --entry  --title "url" --text "Digite a URL do Site:")
+sub=$(zenity --entry  --title "url" --text "Digite o nome do subdiretório: ")
 # Caminho para a wordlist de diretórios do SecList.
 # Altere o caminho se o seu SecList estiver em outro diretório.
 WORDLIST=$(zenity --file-selection --title "Seleção de arquivo" --filename="/usr/share/seclists/Discovery/DNS/")
@@ -300,7 +308,7 @@ echo "A wordlist utilizada é: $WORDLIST"
 # -o: salva a saída em um arquivo.
 # --delay: adiciona um atraso de 100ms entre as requisições, tornando-as menosagressivas.
 # -x: especifica extensões de arquivo comuns para buscar (ex: .php, .html).
-gobuster dir -u "$TARGET_URL" -w "$WORDLIST" -t "$THREADS" -a "$USER_AGENT" --delay 100ms -o "$OUTPUT_FILE" -x php,html,txt,js
+gobuster dir -u "$url/$sub" -w "$WORDLIST" -t "$THREADS" -a "$USER_AGENT" --delay 100ms -o "$OUTPUT_FILE" -x php,html,txt,js
 # Verifica se o comando foi executado com sucesso e se encontrou resultados.
 if [ -s "$OUTPUT_FILE" ]; then
 echo "Varredura concluída. Diretórios e arquivos encontrados salvos em $OUTPUT_FILE."
@@ -402,10 +410,12 @@ cat "$WORDLIST" | cut -d . -f 1 > "$WORDLIST2"
 #Arquivo de Configuração:
 #Crie um arquivo .curlrc (ou _curlrc no Windows) com configurações permanentes, como proxy = hxtp://seu.proxy.com:8080.   
 url=$(zenity --entry  --title "url" --text "Digite a URL do Site:")
+sub=$(zenity --entry  --title "url" --text "Digite o nome do subdiretório: ")
+arq=$(zenity --entry  --title "url" --text "Digite o nome do arquivo.php: ")
 USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/108.0.0.0 Safari/537.30"
 busca=$(zenity --entry  --title "PARAMETRO:href ; .php ; src etc" --text "Digite o parâmetro a buscar:")
- curl -A \""$USER_AGENT"\" "$url" | grep "$busca" 
-cat resposta.txt
+ curl -A \""$USER_AGENT"\" "$url/$sub/$arq" | grep "$busca" | zenity --title "Resultado" --text-info --editable  --width=1000 --height=600   2>/dev/null
+
 ;;
 "Wget-baixar-extenssão")
 #1. Usando Variáveis de Ambiente (Método Preferencial)
@@ -456,6 +466,65 @@ url=$(zenity --entry  --title "url" --text "Digite a URL do Site:")
 echo "Entre no diretório $diretorio e cole o comando: wget --user-agent=\""$AGENT"\" -r -np -nd  -A \""$ext"\"  "$url" " > comando.txt
 cat comando.txt |zenity --title "Cole dentro de $diretorio" --text-info --editable --width=800 --height=400  2>/dev/null
 clear  
+;;
+"Consulta com o egrep")
+#js=$(zenity --file-selection --title "SELECIONE O diretório do ARQUVO JS" --filename="." --directory) \
+#p1=$(zenity --entry  --title "Extenssão" --text "Digite o parametro 01:")
+#p2=$(zenity --entry  --title "Extenssão" --text "Digite o parametro 02:")
+#p3=$(zenity --entry  --title "Extenssão" --text "Digite o parametro 03:")
+aq=$(zenity --file-selection --title  "SELECIONE O arquivo do ARQUVO JS" --filename=".") 
+egrep "api|token|.php|href|src" $aq |zenity --title "Resultado" --text-info --editable  --width=1000 --height=600   2>/dev/null
+clear
+;;
+"Ler arquivo php de diretório")
+url=$(zenity --entry  --title "url" --text "Digite a URL do Site:")
+sub=$(zenity --entry  --title "url" --text "Digite o nome do subdiretório: ")
+arq=$(zenity --entry  --title "url" --text "Digite o nome do arquivo.php: ")
+USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/108.0.0.0 Safari/537.30"
+
+ curl -A \""$USER_AGENT"\" "$url/$sub/$arq" | zenity --title "Resultado" --text-info --editable  --width=1000 --height=600   2>/dev/null
+clear
+;;
+"Ler arquivo php com token")
+url=$(zenity --entry  --title "url" --text "Digite a URL do Site:")
+sub=$(zenity --entry  --title "url" --text "Digite o nome do subdiretório: ")
+arq=$(zenity --entry  --title "url" --text "Digite o nome do arquivo.php: ")
+token=$(zenity --entry  --title "url" --text "Dite o token: ")
+source=$(zenity --entry  --title "url" --text "Digite o parâmetro a pesquisar: ")
+USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/108.0.0.0 Safari/537.30"
+
+ curl -A \""$USER_AGENT"\" "$url/$sub/$arq" --data "token=$token&source=$source" | zenity --title "Resultado" --text-info --editable  --width=1000 --height=600   2>/dev/null
+clear
+;;
+"wfuzz saber filtro")
+#FERRAMENTA WFUZZ:
+#PARAMETROS:-c → cor
+#-w → wordlist
+#-d → dados
+#-H → User Agent
+#--hw → filtrar por palavras
+#--hl → filtrar por linhas
+#--hc → filtrar por caracteres
+url=$(zenity --entry  --title "url" --text "Digite a URL do Site:")
+sub=$(zenity --entry  --title "url" --text "Digite o nome do subdiretório: ")
+arq=$(zenity --entry  --title "url" --text "Digite o nome do arquivo.php: ")
+token=$(zenity --entry  --title "url" --text "Cole o token: ")
+tp=$(zenity --entry  --title "url" --text "Dite o tempo da requisição: ")
+uagent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/108.0.0.0 Safari/537.30"
+wlist=$(zenity --file-selection --title  "SELECIONE A WORDLIST" --filename=".")
+echo wfuzz -c -w "$wlist" -d \""token=$token&source=FUZZ"\" -H \""User-Agent:$uagent" \" -s "$tp" "$url/$sub/$arq" |zenity --title "Copie e cole" --text-info --editable  --width=1000 --height=600 
+;;
+"Wfuzz selecionar filtro")
+url=$(zenity --entry  --title "url" --text "Digite a URL do Site:")
+sub=$(zenity --entry  --title "url" --text "Digite o nome do subdiretório: ")
+arq=$(zenity --entry  --title "url" --text "Digite o nome do arquivo.php: ")
+token=$(zenity --entry  --title "url" --text "Cole o token: ")
+tp=$(zenity --entry  --title "url" --text "Dite o tempo da requisição: ")
+pr=$(zenity --entry --title "Verbose" --text "Escollha o parametro a ser filtrado:" " " hw hl  hc )
+vl=$(zenity --entry  --title "url" --text "digite o valor do parametro a ser filtrado:")
+uagent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/108.0.0.0 Safari/537.30"
+wlist=$(zenity --file-selection --title  "SELECIONE A WORDLIST" --filename=".")
+echo wfuzz -c -w "$wlist" -d \""token=$token&source=FUZZ"\" -H \""User-Agent:$uagent" \" -s "$tp" "--$pr" "$vl"  "$url/$sub/$arq" |zenity --title "Copie e cole" --text-info --editable  --width=1000 --height=600 
 ;;
 "Sair")
 clear
