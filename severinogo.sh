@@ -1,4 +1,5 @@
 #!/bin/bash
+# Desenvolvido por: Fábio Assis
 go=$(zenity --list \
 --title="R1" \
 --text="Selecione uma opção:" \
