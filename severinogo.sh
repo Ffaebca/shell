@@ -10,7 +10,7 @@ FALSE "Encontrar subdomínios-gobuster" \
 FALSE "Encontrar subdomínios-for" \
 FALSE "Encontrar subdommínios-curl" \
 FALSE "Encontrar subdomínios-subfinder" \
-FALSE "Mudar inicio de de subdominios de wordlist" \
+FALSE "Mudar inicio de subdominios de wordlist" \
 FALSE "Usar o httpx-toolkit sem ip" \
 FALSE "Usar o httpx-toolkit com ip" \
 FALSE "Retornar o HTTP headers" \
@@ -219,7 +219,7 @@ dominio=$(zenity --entry  --title "Dominio" --text "Digite o dominio:")
 subfinder -all  -d  "$dominio" -silent  -o sub.txt
 echo "foi criado um arquivo chamado sub.txt "
 ;;
-"Mudar inicio de de subdominios de wordlist")
+"Mudar inicio de subdominios de wordlist")
 dominio=$(zenity --entry  --title "Dominio" --text "Digite palavra inicial para subdominio:")
 wlist=$(zenity --file-selection --title  "Selecione a wordlist desejada:" --filename=".") 
 cat "$wlist" | sed "s/^/$dominio./" > wordlist2
