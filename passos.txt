@@ -5,7 +5,7 @@
 6 - usar a wordlist2 para encontrar novos subdomínios -> gobuster dns -> sub2.txt
 7- juntar os sub1.txt e sub2.txt e criar sub3.txt
 8- usar o attpx-toolkit para criar lista de sites.txt que respondem para web
-9- criar wordlist2 a partir do sub3.txt com remover dominios da lista de subdominios-cut
+9- criar wordlist3 a partir do sub3.txt com remover dominios da lista de subdominios-cut
 10- gobuster dir -f com o site valido e a wordlist2
 11 - filtrar site de login encontrado com grep href ou .php -> "CURL-GREP"
 12- usar o browser para encontrar arquivo app.js
