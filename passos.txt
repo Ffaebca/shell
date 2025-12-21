@@ -1,5 +1,5 @@
-1 - criar lista de subdiretórios com o subfinder -> usuário root -> sub1.txt
-2 - mudar as permissões do arquivo sub.txt -> chown user:user sub1.txt
+1 - criar lista de subdiretórios com o subfinder -> usuário root -> sub.txt
+2 - mudar as permissões do arquivo sub.txt -> chown user:user sub.txt
 4 - voltar ao usuário user
 5- Mudar inicio  de subdominios de wordlist
 6 - usar a wordlist2 para encontrar novos subdomínios -> gobuster dns -> sub2.txt
