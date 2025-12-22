@@ -94,7 +94,7 @@ PORTA=$(zenity --entry  --title "ip" --text "Digite a porta:")
 # Define o user agent personalizado
 USER_AGENT="Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML,like Gecko) Chrome/108.0.0.0 Safari/537.36"
 # Loop para iterar sobre os últimos dígitos dos IPs (ex: 1 a 254)
-for i in {212..218}; do
+for i in {1..255}; do
 IP="${FAIXA_IP}.${i}"
 # Mostra o IP que está sendo testado
  echo "Tentando conectar a http://${IP}:${PORTA}..."
